@@ -70,8 +70,8 @@ class OBSModel {
 			text: `Thank you for playing!`
 		}, sources, ({ width, height }) => {
 			return {
-				x: 1920 / 2 - width / 2,
-				y: 1000 / 2 - (height),
+				x: (1920 / 2 - width / 2) + 100,
+				y: 900 - (height),
 			}
 		});
 	}
@@ -160,7 +160,7 @@ class OBSModel {
 		}, sources.sources,({ height }) => {
 			return {
 				x: 50,
-				y: 1000 - (height) 
+				y: 1050 - (height) 
 			}
 		});
 
@@ -169,7 +169,7 @@ class OBSModel {
 		}, sources.sources, ({ width, height }) => {
 			return {
 				x: 1870 - width,
-				y: 1000 - (height) 
+				y: 1050 - (height) 
 			}
 		});
 	}
@@ -182,7 +182,7 @@ class OBSModel {
 		}, sources.sources, ({ height }) => {
 			return {
 				x: 50,
-				y: 1000 - (height) - 80,
+				y: 1050 - (height) - 80,
 			}
 		});
 		await this.createTextSource('TeamB', 'Quiz', {
@@ -190,7 +190,7 @@ class OBSModel {
 		}, sources.sources, ({ width, height }) => {
 			return {
 				x: 1870 - width,
-				y: 1000 - (height) - 80,
+				y: 1050 - (height) - 80,
 			}
 		});
 	}
