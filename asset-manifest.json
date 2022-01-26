@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/qutopia-scorer/static/css/main.073c9b0a.css",
-    "main.js": "/qutopia-scorer/static/js/main.de1bac6e.js",
+    "main.js": "/qutopia-scorer/static/js/main.f4723a78.js",
     "static/js/787.3d9f095c.chunk.js": "/qutopia-scorer/static/js/787.3d9f095c.chunk.js",
     "index.html": "/qutopia-scorer/index.html",
     "main.073c9b0a.css.map": "/qutopia-scorer/static/css/main.073c9b0a.css.map",
-    "main.de1bac6e.js.map": "/qutopia-scorer/static/js/main.de1bac6e.js.map",
+    "main.f4723a78.js.map": "/qutopia-scorer/static/js/main.f4723a78.js.map",
     "787.3d9f095c.chunk.js.map": "/qutopia-scorer/static/js/787.3d9f095c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.073c9b0a.css",
-    "static/js/main.de1bac6e.js"
+    "static/js/main.f4723a78.js"
   ]
 }
