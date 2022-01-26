@@ -1,40 +1,37 @@
+import { Typography } from '@mui/material';
 import React from 'react';
 import './App.css';
-import OBS from './obsModel';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import OBSComponent from './OBSComponent';
 
-type State = {
-  LoggedIn: boolean;
-}
-class App extends React.Component<{}, State> {
-  componentDidMount() {
-    this.login();
-  }
+function App() {
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
-  componentWillUnmount() {
-    OBS.logout();
-  }
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: prefersDarkMode ? 'dark' : 'light',
+        },
+      }),
+    [prefersDarkMode],
+  );
 
-  async login() {
-    try {
-      await OBS.login('localhost', 4444, 'qutopia');
-      this.setState({ LoggedIn: true });
-    } catch (e) {
-      this.setState({ LoggedIn: false });
-    } finally {
-      await OBS.createElements();
-    }
-  }
-
-  render() {
-    return (
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <div className="App">
-        <header className="App-header">
-        
-        </header>
-      </div>
-    )
-  }
+        <Typography variant="h2" component="h2" style={{ margin: 20 }}>
+          QPositive Scorer
+        </Typography>
 
+        <OBSComponent />
+      </div>
+    </ThemeProvider>
+  );
 }
+
 
 export default App;
