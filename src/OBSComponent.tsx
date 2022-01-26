@@ -30,7 +30,7 @@ class OBSComponent extends React.Component<{}, State> {
 			qm: '',
 			theme: 'General',
 			qs: 50,
-			currentq: 0,
+			currentq: 1,
 		}
 	}
 	onConnect = async (host: string, port: number, pwd: string) => {
@@ -45,7 +45,7 @@ class OBSComponent extends React.Component<{}, State> {
 		}
 	}
 	updateTeams = async (teams: { teamA: string, teamB: string, fullpoints: number }, qm: string, theme: string, qs: number) => {
-		this.setState({ qm, theme });
+		this.setState({ qm, theme, ...teams });
 		await OBS.createElements();
 		await OBS.updateIntroNames(qm, theme);
 		await OBS.updateTeamNames(teams);
@@ -62,12 +62,15 @@ class OBSComponent extends React.Component<{}, State> {
 	}
 	updateScore = async (teamA: number, teamB: number, q: number) => {
 		let { log, currentq } = this.state;
-		log.push({ q, points: teamA ?? teamB, team: teamA ? this.state.teamA : this.state.teamB });
+		log.push({ q, points: teamA ? teamA : teamB, team: teamA ? this.state.teamA : this.state.teamB });
 		currentq += 1;
 		this.setState({ log, currentq });
 		const pointsA = log.reduce((cur, acc) => acc.team === this.state.teamA ? acc.points + cur : cur, 0);
-		const pointsB = log.reduce((cur, acc) => acc.team === this.state.teamA ? acc.points + cur : cur, 0);
+		const pointsB = log.reduce((cur, acc) => acc.team === this.state.teamB ? acc.points + cur : cur, 0);
 		await OBS.updateScore({ teamA: pointsA , teamB: pointsB });
+	}
+	selectQ = async (q: number) => {
+		this.setState({ currentq: q });
 	}
 	render() {
 		const { state } = this;
@@ -77,7 +80,12 @@ class OBSComponent extends React.Component<{}, State> {
 				case 'intro':
 					return <Intro state={this.state} updateOBS={this.updateTeams} showQuiz={this.showQuiz} />;
 				case 'quiz':
-					return <Quiz state={this.state} addScore={this.updateScore} showScores={this.showScores}/>;
+					return <Quiz
+						state={this.state}
+						addScore={this.updateScore}
+						showScores={this.showScores}
+						selectQ={this.selectQ}
+					/>;
 				case 'scores':
 					return <Scores />;
 			}
