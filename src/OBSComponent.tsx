@@ -45,7 +45,7 @@ class OBSComponent extends React.Component<{}, State> {
 		}
 	}
 	updateTeams = async (teams: { teamA: string, teamB: string, fullpoints: number }, qm: string, theme: string, qs: number) => {
-		this.setState({ qm, theme, ...teams });
+		this.setState({ qm, theme, qs, ...teams });
 		await OBS.createElements();
 		await OBS.updateIntroNames(qm, theme);
 		await OBS.updateTeamNames(teams);

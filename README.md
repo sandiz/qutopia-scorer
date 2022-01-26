@@ -14,6 +14,7 @@ qutopia scorer
 		-> share virtual camera on discord
 		-> start recording 
 		-> start presentation
+		-> update obs source 'PresentationApp' to the relevant app
 11. confirm everyone can see the intro obs scene
 12. press start quiz on the app to switch to quiz obs scene (it should also show the presentation)
 13. present quiz and use the form to add points
@@ -21,5 +22,5 @@ qutopia scorer
 15. stop-> recording, stop-> virtual camera
 
 TODO:
- * multiple team support
+ * multiple teams support
  * edit previous question

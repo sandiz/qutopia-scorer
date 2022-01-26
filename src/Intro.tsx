@@ -1,5 +1,4 @@
-import { Container, TextField } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
+import { Container, TextField, Button } from '@mui/material';
 import React from 'react';
 import { State } from './OBSComponent';
 
@@ -73,20 +72,20 @@ export function Intro(props: {
 				value={qs}
 				onChange={(v) => setQs(parseInt(v.target.value))} />
 			<div>
-			<LoadingButton
+			<Button
 				variant="contained"
 				style={{ margin: 20 }}
 				onClick={() => props.updateOBS( { teamA, teamB, fullpoints, }, qm, theme, qs )}
 			>
 				Update OBS
-			</LoadingButton>
-			<LoadingButton
+			</Button>
+			<Button
 				variant="contained"
 				style={{ margin: 20 }}
 				onClick={() => props.showQuiz()}
 			>
 				Start Quiz
-			</LoadingButton>
+			</Button>
 			</div>
 		</Container>
 	);

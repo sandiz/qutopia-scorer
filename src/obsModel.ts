@@ -78,7 +78,7 @@ class OBSModel {
 
 	async getSourceSettings(sourceName: string) {
 		const settings = await this.obs?.send('GetSourceSettings', {
-			sourceName: 'WelcomeText',
+			sourceName,
 		});
 		console.warn('source settings for', sourceName, settings);
 	}
@@ -228,7 +228,7 @@ const TextSettings = {
 	color1: 4294945280,
 	color2: 4294945280,
 	font: {
-		face: "Helvetica",
+		face: "Roboto",
 		flags: 0,
 		size: 70,
 		style: "Regular",
