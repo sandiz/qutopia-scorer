@@ -18,7 +18,7 @@ class OBSModel {
 		this.obs = new OBSWebSocket();
 		this.obs.on('ConnectionClosed', cb);
 		this.obs.on('Exiting', cb);
-		return this.obs.connect({ address: `${ip}:${port}`, password });
+		return this.obs.connect({ address: `${ip}:${port}`, password, secure: window.location.host.includes('localhost') ? false : true });
 	}
 
 	logout() {

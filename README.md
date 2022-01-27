@@ -13,6 +13,7 @@ qutopia scorer
 		-> start presentation -> full screen
 		-> alt tab to obs
 		-> add obs source 'Window Capture' to the relevant app for presentation
+		-> x: 210, y: 0, width: 1445, height: 935
 		-> start virtual camera
 		-> share virtual camera on discord
 		-> start recording 
