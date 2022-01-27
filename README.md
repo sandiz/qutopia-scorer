@@ -4,7 +4,8 @@ qutopia scorer
 2. install obs-websocket plugin
 3. open obs
 4. Tools -> websocket server settings -> set port and password
-5. goto app (https://sandiz.github.io/qutopia-scorer/) -> preferably on diff system (phone etc)
+5. goto app (https://sandiz.github.io/qutopia-scorer/)
+6. enable insecure connections on chrome
 6. enter host (localhost or ur local ip), port and password (set in #4)
 7. click connect
 8. if succesful, it should show the quiz setup page
