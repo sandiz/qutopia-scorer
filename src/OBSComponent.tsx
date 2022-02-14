@@ -46,11 +46,10 @@ class OBSComponent extends React.Component<{}, State> {
 		}
 	}
 	updateTeams = async (teams: string[], scores: number[], fullpoints: number, qm: string, theme: string, qs: number) => {
-		this.setState({ qm, theme, qs, teams });
+		this.setState({ qm, theme, qs, teams, numTeams: teams.length, fullpoints, log: [] });
 		await OBS.createElements();
-		// await OBS.updateIntroNames(qm, theme);
-		await OBS.updateTeamNames(teams);
-		await OBS.updateScore(scores);
+		// await OBS.updateIntroNames(qm,s theme);
+		await OBS.updateScore(teams, scores);
 		await this.showQuiz();
 	}
 	showQuiz = async () => {
@@ -66,7 +65,7 @@ class OBSComponent extends React.Component<{}, State> {
 		log.push({ q, points: scores });
 		currentq += 1;
 		this.setState({ log, currentq });
-		await OBS.updateScore(logToScores(this.state));
+		await OBS.updateScore(this.state.teams, logToScores(this.state));
 	}
 	selectQ = async (q: number) => {
 		this.setState({ currentq: q });

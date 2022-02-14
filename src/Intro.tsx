@@ -1,6 +1,6 @@
 import { Container, TextField, Button } from '@mui/material';
 import React from 'react';
-import { logToScores, State } from './OBSComponent';
+import { State } from './OBSComponent';
 
 export function Intro(props: {
 	state: Readonly<State>;
@@ -42,10 +42,11 @@ export function Intro(props: {
 				id="outlined-required"
 				label="Num Teams"
 				style={{ margin: 10 }}
-				value={numTeams}
+				defaultValue={numTeams}
 				onChange={(v) => {
 					const num = parseInt(v.target.value) || 0;
 					setNumTeams(!isNaN(num) ? num : 0);
+					setTeams(new Array(num).fill(''));
 				}}
 			/>
 			{
@@ -57,10 +58,10 @@ export function Intro(props: {
 							id="outlined-required"
 							label={`Team Name ${i + 1}`}
 							style={{ margin: 10 }}
-							value={teams[i]}
+							defaultValue={teams[i]}
 							onChange={(v) => {
 								teams[i] = v.target.value;
-								setTeams(teams)
+								setTeams(teams);
 							}} />
 					);
 				})
@@ -85,7 +86,7 @@ export function Intro(props: {
 			<Button
 				variant="contained"
 				style={{ margin: 20 }}
-					onClick={() => props.updateOBS(teams, logToScores(props.state), fullpoints, qm, theme, qs)}
+					onClick={() => props.updateOBS(teams, teams.map(() => 0), fullpoints, qm, theme, qs)}
 			>
 				Update OBS
 			</Button>

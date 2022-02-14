@@ -131,12 +131,15 @@ class OBSModel {
 		if (!this.obs || disableBG) { return; }
 		const hasBG = Boolean(sources.find(s => s.name === sourceName));
 		if (hasBG) {
+			const sourceSettings = {
+				...BGSettings,
+				...settings,
+			};
+			//@ts-ignore
+			sourceSettings.font.size = settings.size || 70;
 			this.obs.send('SetSourceSettings', {
 				sourceName,
-				sourceSettings: {
-					...BGSettings,
-					...settings,
-				},
+				sourceSettings,
 			});
 		} else {
 			await this.obs.send('CreateSource', {
@@ -152,41 +155,26 @@ class OBSModel {
 		}
 	}
 
-	async updateScore(scores: number[]) {
-		console.warn('update score', scores);
+	async updateScore(teams: string[], scores: number[]) {
 		if (!this.obs) { return; }
 		const sources = await this.obs.send('GetSourcesList');
 		scores.forEach(async (score, index) => {
-			const source = `Score${index + 1}`;
-			await this.createTextSource(source, 'Quiz', {
-				text: scores[index].toString().padStart(3, '0'),
+			const team = teams[index];
+			const sourceName = `${team}`;
+			console.warn(sourceName)
+			await this.createTextSource(sourceName, 'Quiz', {
+				text: `${team}: ${score.toString().padStart(3, '0')	}`,
+				size: 30,
 			}, sources.sources,({ height }) => {
 				return {
-					x: 40,
-					y: 100 + (index * 150) ,
+					x: 40 + (index * 300),
+					y: 1080 - 55,
 				}
 			});
 		});
-		/*
-		await this.createTextSource('TeamAScore', 'Quiz', {
-			text: score.teamA.toString().padStart(3, '0'),
-		}, sources.sources,({ height }) => {
-			return {
-				x: 50,
-				y: 1050 - (height) 
-			}
-		});
-
-		await this.createTextSource('TeamBScore', 'Quiz', {
-			text: score.teamB.toString().padStart(3, '0'),
-		}, sources.sources, ({ width, height }) => {
-			return {
-				x: 1870 - width,
-				y: 1050 - (height) 
-			}
-		});*/
 	}
 
+	/*
 	async updateTeamNames(teams: string[]) {
 		if (!this.obs) { return; }
 		const sources = await this.obs.send('GetSourcesList');
@@ -194,14 +182,15 @@ class OBSModel {
 			const sourceName = `${team}`;
 			await this.createTextSource(sourceName, 'Quiz', {
 				text: sourceName,
+				size: 30,
 			}, sources.sources, ({ height }) => {
 				return {
-					x: 40,
-					y: 40 + (index * 150) ,
+					x: 40 + (index * 100),
+					y: 1080 - 95,
 				}
 			});
 		});
-	}
+	}*/
 
 	async updateIntroNames(qm: string, theme: string) {
 		if (!this.obs) { return; }
@@ -238,7 +227,7 @@ const TextSettings = {
 	font: {
 		face: "DIN Condensed",
 		flags: 0,
-		size: 70,
+		size: 40,
 		style: "Regular",
 	},
 	drop_shadow: true
