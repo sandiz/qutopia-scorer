@@ -4,19 +4,15 @@ import { State } from './OBSComponent';
 
 export function Intro(props: {
 	state: Readonly<State>;
-	updateOBS: (teams: {
-		teamA: string,
-		teamB: string,
-		fullpoints: number,
-	}, qm: string, theme: string, qs: number) => Promise<void>;
+	updateOBS: (teams: string[], scores: number[], fullpoints: number, qm: string, theme: string, qs: number) => Promise<void>;
 	showQuiz: () => Promise<void>;
 }) {
-	const [teamA, setTeamA] = React.useState('Team A');
-	const [teamB, setTeamB] = React.useState('Team B');
-	const [fullpoints, setFullpoints] = React.useState(10);
-	const [qm, setQm] = React.useState('Nemo');
-	const [theme, setTheme] = React.useState('General');
-	const [qs, setQs] = React.useState(50);
+	const [teams, setTeams] = React.useState(props.state.teams);
+	const [fullpoints, setFullpoints] = React.useState(props.state.fullpoints);
+	const [numTeams, setNumTeams] = React.useState(props.state.numTeams);
+	const [qm, setQm] = React.useState(props.state.qm);
+	const [theme, setTheme] = React.useState(props.state.theme);
+	const [qs, setQs] = React.useState(props.state.qs);
 	return (
 		<Container
 			maxWidth="md"
@@ -41,20 +37,34 @@ export function Intro(props: {
 				style={{ margin: 10 }}
 				value={theme}
 				onChange={(v) => setTheme(v.target.value)} />
-			<TextField
+				<TextField
 				required
 				id="outlined-required"
-				label="Team Name"
+				label="Num Teams"
 				style={{ margin: 10 }}
-				value={teamA}
-				onChange={(v) => setTeamA(v.target.value)} />
-			<TextField
-				required
-				id="outlined"
-				label="Team Name"
-				style={{ margin: 10 }}
-				value={teamB}
-				onChange={(v) => setTeamB((v.target.value))} />
+				value={numTeams}
+				onChange={(v) => {
+					const num = parseInt(v.target.value) || 0;
+					setNumTeams(!isNaN(num) ? num : 0);
+				}}
+			/>
+			{
+				new Array(numTeams).fill(0).map((_, i) => {
+					return (
+						<TextField
+							required
+							key={ i }
+							id="outlined-required"
+							label={`Team Name ${i + 1}`}
+							style={{ margin: 10 }}
+							value={teams[i]}
+							onChange={(v) => {
+								teams[i] = v.target.value;
+								setTeams(teams)
+							}} />
+					);
+				})
+			}
 			<TextField
 				required
 				id="outlined"
@@ -75,7 +85,12 @@ export function Intro(props: {
 			<Button
 				variant="contained"
 				style={{ margin: 20 }}
-				onClick={() => props.updateOBS( { teamA, teamB, fullpoints, }, qm, theme, qs )}
+					onClick={() => props.updateOBS(teams, props.state.log.reduce((acc, curr) => {
+						curr.points.forEach((p, i) => {
+							acc[i] += p;
+						});
+						return acc;
+				}, [] as number[]), fullpoints, qm, theme, qs )}
 			>
 				Update OBS
 			</Button>

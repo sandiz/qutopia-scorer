@@ -3,14 +3,14 @@ import OBSWebSocket from "obs-websocket-js";
 const IMAGES = {
 	BG: 'https://sandiz.github.io/qutopia-scorer/trivia-night.jpeg',
 }
-const SCENES = ['Intro', 'Quiz', 'Scores',];
+const SCENES = [ /* 'Intro', */ 'Quiz', 'Scores',];
 
 type Source = {
 	name: string;
 	typeId: string;
 	type: string;
 };
-
+const disableBG = true;
 class OBSModel {
 	obs: OBSWebSocket | undefined;
 
@@ -31,11 +31,11 @@ class OBSModel {
 		await this.createSceneElements();
 
 		const sources = await this.obs.send('GetSourcesList');
-		await this.createIntroSourceElements(sources.sources);
+		//await this.createIntroSourceElements(sources.sources);
 		await this.createQuizSourceElements(sources.sources);
 		await this.createScoresSourceElements(sources.sources);
 
-		await this.obs?.send('SetCurrentScene', { 'scene-name': 'Intro' });
+		await this.obs?.send('SetCurrentScene', { 'scene-name': 'Quiz' });
 	}
 
 	async createSceneElements() {
@@ -128,7 +128,7 @@ class OBSModel {
 	}
 
 	async createBGSource(sourceName: string, sceneName: string, settings: {}, sources: Source[]) {
-		if (!this.obs) { return; }
+		if (!this.obs || disableBG) { return; }
 		const hasBG = Boolean(sources.find(s => s.name === sourceName));
 		if (hasBG) {
 			this.obs.send('SetSourceSettings', {
@@ -152,9 +152,10 @@ class OBSModel {
 		}
 	}
 
-	async updateScore(score: { teamA: number, teamB: number }) {
+	async updateScore(teams: number[]) {
 		if (!this.obs) { return; }
 		const sources = await this.obs.send('GetSourcesList');
+		/*
 		await this.createTextSource('TeamAScore', 'Quiz', {
 			text: score.teamA.toString().padStart(3, '0'),
 		}, sources.sources,({ height }) => {
@@ -171,12 +172,13 @@ class OBSModel {
 				x: 1870 - width,
 				y: 1050 - (height) 
 			}
-		});
+		});*/
 	}
 
-	async updateTeamNames(teamNames: { teamA: string, teamB: string }) {
+	async updateTeamNames(teams: string[]) {
 		if (!this.obs) { return; }
 		const sources = await this.obs.send('GetSourcesList');
+		/*
 		await this.createTextSource('TeamA', 'Quiz', {
 			text: teamNames.teamA.toString(),
 		}, sources.sources, ({ height }) => {
@@ -192,7 +194,7 @@ class OBSModel {
 				x: 1870 - width,
 				y: 1050 - (height) - 80,
 			}
-		});
+		});*/
 	}
 
 	async updateIntroNames(qm: string, theme: string) {
@@ -228,7 +230,7 @@ const TextSettings = {
 	color1: 4294945280,
 	color2: 4294945280,
 	font: {
-		face: "Roboto",
+		face: "DIN Condensed",
 		flags: 0,
 		size: 70,
 		style: "Regular",

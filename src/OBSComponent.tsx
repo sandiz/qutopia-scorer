@@ -8,29 +8,30 @@ import { Quiz } from './Quiz';
 export type State = {
 	scene: 'intro' | 'quiz' | 'scores';
 	connection: 'connecting' | 'loggedin' | 'loggedout' | 'error';
-	teamA: string;
-	teamB: string;
+	teams: string[];
 	fullpoints: number;
-	log: { q: number, points: number, team: string }[];
+	log: { q: number, points: number[] }[];
 	qm: string;
 	theme: string;
 	qs: number;
 	currentq: number;
+	numTeams: number;
 }
 class OBSComponent extends React.Component<{}, State> {
 	constructor(props: {}) {
 		super(props);
+		const numTeams = 2;
 		this.state = {
 			scene: 'intro',
 			connection: 'loggedout',
-			teamA: 'Team A',
-			teamB: 'Team B',
 			fullpoints: 10,
 			log: [],
-			qm: '',
+			qm: 'Nemo',
 			theme: 'General',
 			qs: 50,
 			currentq: 1,
+			teams: new Array<string>(2).map((i) => `Team ${i + 1}`),
+			numTeams,
 		}
 	}
 	onConnect = async (host: string, port: number, pwd: string) => {
@@ -44,13 +45,13 @@ class OBSComponent extends React.Component<{}, State> {
 			return;
 		}
 	}
-	updateTeams = async (teams: { teamA: string, teamB: string, fullpoints: number }, qm: string, theme: string, qs: number) => {
-		this.setState({ qm, theme, qs, ...teams });
+	updateTeams = async (teams: string[], scores: number[], fullpoints: number, qm: string, theme: string, qs: number) => {
+		this.setState({ qm, theme, qs, teams });
 		await OBS.createElements();
-		await OBS.updateIntroNames(qm, theme);
+		// await OBS.updateIntroNames(qm, theme);
 		await OBS.updateTeamNames(teams);
-		await OBS.updateScore({ teamA: 0, teamB: 0 });
-		await OBS.showScene('Intro');
+		await OBS.updateScore(scores);
+		await this.showQuiz();
 	}
 	showQuiz = async () => {
 		await OBS.showScene('Quiz');
@@ -60,14 +61,12 @@ class OBSComponent extends React.Component<{}, State> {
 		await OBS.showScene('Scores');
 		this.setState({ scene: 'scores' });
 	}
-	updateScore = async (teamA: number, teamB: number, q: number) => {
+	updateScore = async (scores: number[], q: number) => {
 		let { log, currentq } = this.state;
-		log.push({ q, points: teamA ? teamA : teamB, team: teamA ? this.state.teamA : this.state.teamB });
+		log.push({ q, points: scores });
 		currentq += 1;
 		this.setState({ log, currentq });
-		const pointsA = log.reduce((cur, acc) => acc.team === this.state.teamA ? acc.points + cur : cur, 0);
-		const pointsB = log.reduce((cur, acc) => acc.team === this.state.teamB ? acc.points + cur : cur, 0);
-		await OBS.updateScore({ teamA: pointsA , teamB: pointsB });
+		await OBS.updateScore(scores);
 	}
 	selectQ = async (q: number) => {
 		this.setState({ currentq: q });
