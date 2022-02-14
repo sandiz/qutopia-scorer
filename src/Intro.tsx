@@ -1,6 +1,6 @@
 import { Container, TextField, Button } from '@mui/material';
 import React from 'react';
-import { State } from './OBSComponent';
+import { logToScores, State } from './OBSComponent';
 
 export function Intro(props: {
 	state: Readonly<State>;
@@ -85,12 +85,7 @@ export function Intro(props: {
 			<Button
 				variant="contained"
 				style={{ margin: 20 }}
-					onClick={() => props.updateOBS(teams, props.state.log.reduce((acc, curr) => {
-						curr.points.forEach((p, i) => {
-							acc[i] += p;
-						});
-						return acc;
-				}, [] as number[]), fullpoints, qm, theme, qs )}
+					onClick={() => props.updateOBS(teams, logToScores(props.state), fullpoints, qm, theme, qs)}
 			>
 				Update OBS
 			</Button>

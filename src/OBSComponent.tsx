@@ -38,7 +38,7 @@ class OBSComponent extends React.Component<{}, State> {
 		this.setState({ connection: 'connecting' })
 		try {
 			await OBS.login(host, port, pwd, () => { this.setState({ connection: 'loggedout' }) });
-			this.setState({ connection: 'loggedin' });
+			this.setState({ connection: 'loggedin', log: [] });
 		} catch (e) {
 			console.warn('failed to connect');
 			this.setState({ connection: 'error' });
@@ -66,7 +66,7 @@ class OBSComponent extends React.Component<{}, State> {
 		log.push({ q, points: scores });
 		currentq += 1;
 		this.setState({ log, currentq });
-		await OBS.updateScore(scores);
+		await OBS.updateScore(logToScores(this.state));
 	}
 	selectQ = async (q: number) => {
 		this.setState({ currentq: q });
@@ -98,6 +98,15 @@ class OBSComponent extends React.Component<{}, State> {
 
 function Scores() {
 	return null;
+}
+
+export const logToScores = (state: State) => {
+	return state.log.reduce((acc, curr) => {
+		curr.points.forEach((p, i) => {
+			acc[i] += p;
+		});
+		return acc;
+	}, new Array<number>(state.numTeams).fill(0));
 }
 
 

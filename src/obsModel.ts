@@ -152,9 +152,21 @@ class OBSModel {
 		}
 	}
 
-	async updateScore(teams: number[]) {
+	async updateScore(scores: number[]) {
+		console.warn('update score', scores);
 		if (!this.obs) { return; }
 		const sources = await this.obs.send('GetSourcesList');
+		scores.forEach(async (score, index) => {
+			const source = `Score${index + 1}`;
+			await this.createTextSource(source, 'Quiz', {
+				text: scores[index].toString().padStart(3, '0'),
+			}, sources.sources,({ height }) => {
+				return {
+					x: 40,
+					y: 100 + (index * 150) ,
+				}
+			});
+		});
 		/*
 		await this.createTextSource('TeamAScore', 'Quiz', {
 			text: score.teamA.toString().padStart(3, '0'),
@@ -178,23 +190,17 @@ class OBSModel {
 	async updateTeamNames(teams: string[]) {
 		if (!this.obs) { return; }
 		const sources = await this.obs.send('GetSourcesList');
-		/*
-		await this.createTextSource('TeamA', 'Quiz', {
-			text: teamNames.teamA.toString(),
-		}, sources.sources, ({ height }) => {
-			return {
-				x: 50,
-				y: 1050 - (height) - 80,
-			}
+		teams.forEach(async (team, index) => {
+			const sourceName = `${team}`;
+			await this.createTextSource(sourceName, 'Quiz', {
+				text: sourceName,
+			}, sources.sources, ({ height }) => {
+				return {
+					x: 40,
+					y: 40 + (index * 150) ,
+				}
+			});
 		});
-		await this.createTextSource('TeamB', 'Quiz', {
-			text: teamNames.teamB.toString().padStart(3, '0'),
-		}, sources.sources, ({ width, height }) => {
-			return {
-				x: 1870 - width,
-				y: 1050 - (height) - 80,
-			}
-		});*/
 	}
 
 	async updateIntroNames(qm: string, theme: string) {
