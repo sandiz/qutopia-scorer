@@ -42,7 +42,7 @@ export function Quiz(props: {
 		>
 			<Button
 				variant="outlined"
-				style={{ marginBottom: 20, height: 40 + 'px'}}
+				style={{ marginBottom: 20, height: 40 + 'px' }}
 			>Question {q}
 			</Button>
 			{
@@ -58,6 +58,21 @@ export function Quiz(props: {
 								justifyContent: 'center',
 							}}
 						>
+							<Button variant="outlined" onClick={() => {
+								const s = [...scores];
+								s[i] = Math.floor(props.state.fullpoints);
+								setScores(s);
+							}} style={{ marginRight: 10 }}>100%</Button>
+							<Button variant="outlined" style={{ marginRight: 10 }} onClick={() => {
+								const s = [...scores];
+								s[i] = Math.floor(props.state.fullpoints / 2);
+								setScores(s);
+							}}>50%</Button>
+							<Button variant="outlined" onClick={() => {
+								const s = [...scores];
+								s[i] = Math.floor(props.state.fullpoints / 3);
+								setScores(s);
+							}}>33%</Button>
 							<TextField
 								id="outlined"
 								datatype="number"
@@ -70,16 +85,6 @@ export function Quiz(props: {
 									setScores(s);
 								}}
 							/>
-							<Button variant="outlined" onClick={() => {
-									const s = [...scores];
-									s[i] = props.state.fullpoints;
-									setScores(s);
-							}} style={{ marginRight: 10 }}>F</Button>
-								<Button variant="outlined" onClick={() => {
-									const s = [...scores];
-									s[i] = props.state.fullpoints / 2;
-									setScores(s);
-							}}>H</Button>
 						</Container>
 					);
 				})
@@ -114,17 +119,17 @@ export function Quiz(props: {
 					}, 'image/png');
 					//props.showScores();
 				}}
-				>
-					End Quiz
+			>
+				End Quiz
 			</Button>
 		</Container>
 	);
 }
 
 const Item = styled(Paper)(({ theme }) => ({
-  ...theme.typography.body2,
-  padding: theme.spacing(2),
-  textAlign: 'center',
+	...theme.typography.body2,
+	padding: theme.spacing(2),
+	textAlign: 'center',
 	color: theme.palette.text.secondary,
 }));
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -185,12 +190,15 @@ export function ResponsiveTable(props: { state: State, selectQ: (q: number) => v
 	);
 }
 export function ResponsiveGrid(props: { state: State, selectQ: (q: number) => void, tableRef: React.RefObject<any>, innerTableRef: React.RefObject<any> }) {
-  return (
+	return (
 		<Box sx={{ flexGrow: 1 }} style={{ margin: 10, padding: 20 }} ref={props.tableRef}>
 			<Typography style={{ marginBottom: 20 }}>
-				[ { props.state.teams.join(" | ") } ]
+				[ {props.state.teams.map((f, i) => `${f} - ${props.state.log.reduce((acc, cur) => {
+					acc += cur.points[i];
+					return acc;
+				}, 0)}`).join(" | ")} ]
 			</Typography>
-      <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }} ref={props.innerTableRef}>
+			<Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }} ref={props.innerTableRef}>
 				{Array.from(Array(props.state.qs)).map((_, index) => {
 					const qnum = index + 1;
 					const team = props.state.log[index];
@@ -210,13 +218,13 @@ export function ResponsiveGrid(props: { state: State, selectQ: (q: number) => vo
 									fontSize: 14,
 									//cursor: 'pointer'
 								}}
-								//onClick={() => props.selectQ(index + 1)}
+							//onClick={() => props.selectQ(index + 1)}
 							>{message}
 							</Item>
 						</Grid>
 					)
 				})}
-      </Grid>
-    </Box>
-  );
+			</Grid>
+		</Box>
+	);
 }
