@@ -66,12 +66,28 @@ class OBSModel {
 		await this.createBGSource('ScoresBG', 'Scores', {}, sources);
 
 		// thank u for playing
-		await this.createTextSource('Thanks', 'Scores', {
+		/*await this.createTextSource('Thanks', 'Scores', {
 			text: `Thank you for playing!`
 		}, sources, ({ width, height }) => {
 			return {
 				x: (1920 / 2 - width / 2) + 100,
 				y: 900 - (height),
+			}
+		});*/
+		await this.createSource('ScorePNG', 'Scores', {
+		}, sources, ({ width, height }) => {
+			return {
+				x: (1920 / 2 - 550 / 2) + 100,
+				y: 28,
+			}
+		}, 'image_source', {
+			width: 550,
+			height: 1000,
+			sourceWidth: 550,
+			sourceHeight: 1000,
+			scale: {
+				x: 0.5,
+				y: 0.5,
 			}
 		});
 	}
@@ -83,23 +99,29 @@ class OBSModel {
 		console.warn('source settings for', sourceName, settings);
 	}
 
-	async createTextSource(sourceName: string, sceneName: string, settings: {}, sources: Source[], position: (props: any) => { x: number, y:number } = () => ({ x: 0, y: 0 })) {
+	async createSource(
+		sourceName: string,
+		sceneName: string,
+		settings: {},
+		sources: Source[],
+		position: (props: any) => { x: number, y: number } = () => ({ x: 0, y: 0 }),
+		sourceKind = 'text_ft2_source',
+		properties = {},
+	) {
 		if (!this.obs) { return; }
 		const hasSource = Boolean(sources.find(s => s.name === sourceName));
 		if (hasSource) {
 			await this.obs.send('SetSourceSettings', {
 				sourceName,
 				sourceSettings: {
-					...TextSettings,
 					...settings,
 				},
 			});
 		} else {
 			await this.obs.send('CreateSource', {
-				sourceKind: 'text_ft2_source',
+				sourceKind,
 				sourceName,
 				sourceSettings: {
-					...TextSettings,
 					...settings,
 				},
 				sceneName,
@@ -123,6 +145,7 @@ class OBSModel {
 			},
 			crop: {},
 			bounds: {},
+			...properties,
 		});
 
 	}
@@ -161,8 +184,8 @@ class OBSModel {
 		scores.forEach(async (score, index) => {
 			const team = teams[index];
 			const sourceName = `${team}`;
-			console.warn(sourceName)
-			await this.createTextSource(sourceName, 'Quiz', {
+			await this.createSource(sourceName, 'Quiz', {
+				...TextSettings,
 				text: `${team}: ${score.toString().padStart(3, '0')	}`,
 				size: 30,
 			}, sources.sources,({ height }) => {
@@ -195,7 +218,8 @@ class OBSModel {
 	async updateIntroNames(qm: string, theme: string) {
 		if (!this.obs) { return; }
 		const sources = await this.obs.send('GetSourcesList');
-		await this.createTextSource('WelcomeText', 'Intro', {
+		await this.createSource('WelcomeText', 'Intro', {
+			...TextSettings,
 			text: `${ theme } Quiz\nQM: ${ qm }`
 		}, sources.sources, ({ height }) => {
 			return {

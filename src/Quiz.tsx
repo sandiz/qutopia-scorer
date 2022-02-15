@@ -1,4 +1,4 @@
-import { Button, Container, styled, TextField } from '@mui/material';
+import { Button, Container, styled, TextField, Typography } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useEffect } from 'react';
 import { State } from './OBSComponent';
@@ -12,6 +12,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import React from 'react';
+import html2canvas from 'html2canvas';
+import { saveAs } from 'file-saver';
+
 export function Quiz(props: {
 	state: Readonly<State>;
 	addScore: (scores: number[], q: number) => Promise<void>;
@@ -22,9 +25,11 @@ export function Quiz(props: {
 	const [scores, setScores] = React.useState(state.log[state.currentq - 1]?.points || new Array<number>(state.numTeams).fill(0));
 	const [q, setQ] = React.useState(state.currentq);
 	const tableRef = React.useRef<any>();
+	const innerTableRef = React.useRef<any>();
 	useEffect(() => {
 		setQ(state.currentq);
-	}, [state])
+		tableRef.current.scrollTop = tableRef.current.scrollHeight + 100;
+	}, [state, scores])
 	return (
 		<Container
 			maxWidth="md"
@@ -86,20 +91,32 @@ export function Quiz(props: {
 					onClick={() => {
 						setScores(new Array<number>(state.numTeams).fill(0));
 						props.addScore(scores, q);
-						tableRef.current.scrollTop = tableRef.current.scrollHeight + 100;
 					}}
 				>
 					Add Score
 				</LoadingButton>
 			</div>
-			<ResponsiveTable state={state} selectQ={props.selectQ} tableRef={tableRef} />
+			<ResponsiveGrid state={state} selectQ={props.selectQ} tableRef={tableRef} innerTableRef={innerTableRef} />
 			<Button
-					variant="contained"
-					style={{ margin: 20 }}
-					onClick={() => props.showScores()}
+				variant="contained"
+				style={{ margin: 20 }}
+				onClick={async () => {
+					//tableRef.current.style.overflow = 'auto';
+					//tableRef.current.style.height = '100%';
+					const canvas = await html2canvas(tableRef.current, {
+						backgroundColor: '#000000',
+					});
+					//tableRef.current.style.overflow = 'scroll';
+					//tableRef.current.style.height = 215 + 'px';
+
+					canvas.toBlob(async (blob) => {
+						blob && saveAs(blob, 'scores.png');
+					}, 'image/png');
+					//props.showScores();
+				}}
 				>
 					End Quiz
-				</Button>
+			</Button>
 		</Container>
 	);
 }
@@ -130,11 +147,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 	},
 }));
 
-export function ResponsiveTable(props: { state: State, selectQ: (q: number) => void, tableRef: React.RefObject<any> }) {
+export function ResponsiveTable(props: { state: State, selectQ: (q: number) => void, tableRef: React.RefObject<any>, innerTableRef: React.RefObject<any> }) {
 	const rows = props.state.log;
 	return (
-		<TableContainer component={Paper} style={{ width: '90%', marginBottom: 30, marginTop: 20, height: 215, overflow: 'scroll' }} ref={props.tableRef}>
-			<Table sx={{ width: '100%' }} aria-label="customized table">
+		<TableContainer component={Paper} style={{ width: '90%', marginBottom: 30, marginTop: 20, height: 215, overflow: 'auto', padding: 0 }} ref={props.tableRef}>
+			<Table sx={{ width: '100%', padding: 0 }} aria-label="customized table" id="score-table" ref={props.innerTableRef}>
 				<TableHead>
 					<TableRow>
 						<StyledTableCell>Question</StyledTableCell>
@@ -167,21 +184,20 @@ export function ResponsiveTable(props: { state: State, selectQ: (q: number) => v
 		</TableContainer>
 	);
 }
-export function ResponsiveGrid(props: { state: State, selectQ: (q: number) => void}) {
+export function ResponsiveGrid(props: { state: State, selectQ: (q: number) => void, tableRef: React.RefObject<any>, innerTableRef: React.RefObject<any> }) {
   return (
-    <Box sx={{ flexGrow: 1 }} style={{ margin: 20 }}>
-      <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+		<Box sx={{ flexGrow: 1 }} style={{ margin: 10, padding: 20 }} ref={props.tableRef}>
+			<Typography style={{ marginBottom: 20 }}>
+				[ { props.state.teams.join(" | ") } ]
+			</Typography>
+      <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }} ref={props.innerTableRef}>
 				{Array.from(Array(props.state.qs)).map((_, index) => {
 					const qnum = index + 1;
 					const team = props.state.log[index];
-					const points = team?.points.reduce((acc, curr, i) => {
-						acc.push(<div key={curr}>{props.state.teams[i]} - {curr}</div>);
-						return acc;
-					}, [] as JSX.Element[]);
 					const message = team ? (
 						<React.Fragment>
-							<div>Qs. {qnum}</div>
-							{points}
+							<div>{qnum}. </div>
+							<span>[ {team?.points.join(" | ")} ]</span>
 						</React.Fragment>
 					) : <div>{qnum}</div>;
 					const filled = Boolean(props.state.log[index])
@@ -191,7 +207,7 @@ export function ResponsiveGrid(props: { state: State, selectQ: (q: number) => vo
 								style={{
 									background: filled ? 'limegreen' : undefined,
 									color: filled ? 'black' : 'white',
-									fontSize: 15,
+									fontSize: 14,
 									//cursor: 'pointer'
 								}}
 								//onClick={() => props.selectQ(index + 1)}
