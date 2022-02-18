@@ -14,22 +14,62 @@ import TableRow from '@mui/material/TableRow';
 import React from 'react';
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+	CategoryScale,
+} from 'chart.js';
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	Title,
+	Tooltip,
+	Legend
+);
+function selectColor(number: number) {
+  const hue = number * 137.508; // use golden angle approximation
+  return `hsl(${hue},50%,75%)`;
+}
 
 export function Quiz(props: {
 	state: Readonly<State>;
 	addScore: (scores: number[], q: number) => Promise<void>;
 	showScores: () => Promise<void>;
 	selectQ: (q: number) => void;
+	randomize: () => void;
 }) {
 	const { state } = props;
 	const [scores, setScores] = React.useState(state.log[state.currentq - 1]?.points || new Array<number>(state.numTeams).fill(0));
 	const [q, setQ] = React.useState(state.currentq);
 	const tableRef = React.useRef<any>();
 	const innerTableRef = React.useRef<any>();
+	const lineRef = React.useRef<any>();
 	useEffect(() => {
 		setQ(state.currentq);
 		tableRef.current.scrollTop = tableRef.current.scrollHeight + 100;
-	}, [state, scores])
+	}, [state, scores]);
+
+	const getChartData = () => {
+		const out = state.log.reduce((acc, cur, j) => {
+			if (j === 0) {
+				acc[j] = cur.points;
+			} else {
+				acc[j] = cur.points.map((v, i) => v + acc[j - 1][i]);
+			}
+			return acc;
+		}, [] as number[][]);
+		//console.warn('getChartData', out);
+		return out;
+	};
+
 	return (
 		<Container
 			maxWidth="md"
@@ -100,8 +140,43 @@ export function Quiz(props: {
 				>
 					Add Score
 				</LoadingButton>
+				<LoadingButton
+					variant="contained"
+					style={{ margin: 20 }}
+					onClick={() => {
+						props.randomize();
+					}}
+				>
+					Random Score (DEBUG)
+				</LoadingButton>
 			</div>
 			<ResponsiveGrid state={state} selectQ={props.selectQ} tableRef={tableRef} innerTableRef={innerTableRef} />
+			<Line
+				ref={lineRef}
+				data={{
+					labels: new Array(state.qs).fill(0).map((v, i) => i + 1),
+					datasets: state.teams.map((team, i) => {
+						return {
+							label: team.toString(),
+							data: getChartData().map((v, j) => v[i]),
+							borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+							backgroundColor: selectColor(i)
+						}
+					})
+				}}
+				options={{
+					responsive: true,
+					plugins: {
+						legend: {
+							position: 'top' as const,
+						},
+						title: {
+							display: true,
+							text: 'Score graph',
+						},
+					},
+				}}
+			/>
 			<Button
 				variant="contained"
 				style={{ margin: 20 }}
@@ -116,6 +191,10 @@ export function Quiz(props: {
 
 					canvas.toBlob(async (blob) => {
 						blob && saveAs(blob, 'scores.png');
+
+						lineRef.current.canvas.toBlob(async (blob: string | Blob) => {
+							blob && saveAs(blob, 'stats.png')
+						})
 					}, 'image/png');
 					//props.showScores();
 				}}

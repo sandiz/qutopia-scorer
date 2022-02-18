@@ -70,6 +70,18 @@ class OBSComponent extends React.Component<{}, State> {
 	selectQ = async (q: number) => {
 		this.setState({ currentq: q });
 	}
+	randomize = () => {
+		const log = [];
+		const fp = this.state.fullpoints;
+		const pointsRandom = [fp, Math.floor(fp / 2), Math.floor(fp / 3)];
+		for (let i = 0; i < this.state.qs; i++) {
+			log.push({
+				q: i + 1,
+				points: new Array<number>(this.state.numTeams).fill(0).map(() => pointsRandom[Math.floor(Math.random() * pointsRandom.length)])
+			});
+		}
+		this.setState({ log });
+	}
 	render() {
 		const { state } = this;
 		const { scene, connection } = this.state;
@@ -83,6 +95,7 @@ class OBSComponent extends React.Component<{}, State> {
 						addScore={this.updateScore}
 						showScores={this.showScores}
 						selectQ={this.selectQ}
+						randomize={this.randomize}
 					/>;
 				case 'scores':
 					return <Scores />;
