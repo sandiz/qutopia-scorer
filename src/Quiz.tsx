@@ -45,6 +45,7 @@ export function Quiz(props: {
 	showScores: () => Promise<void>;
 	selectQ: (q: number) => void;
 	randomize: () => void;
+	editScore: (index: number, scores: number[]) => void;
 }) {
 	const { state } = props;
 	const [scores, setScores] = React.useState(state.log[state.currentq - 1]?.points || new Array<number>(state.numTeams).fill(0));
@@ -52,10 +53,11 @@ export function Quiz(props: {
 	const tableRef = React.useRef<any>();
 	const innerTableRef = React.useRef<any>();
 	const lineRef = React.useRef<any>();
+	const [edit, setEdit] = React.useState(-1);
 	useEffect(() => {
-		setQ(state.currentq);
-		tableRef.current.scrollTop = tableRef.current.scrollHeight + 100;
-	}, [state, scores]);
+		(edit < 0 ) && setQ(state.currentq);
+		//tableRef.current.scrollTop = tableRef.current.scrollHeight + 100;
+	}, [state, scores, edit]);
 
 	const getChartData = () => {
 		const out = state.log.reduce((acc, cur, j) => {
@@ -82,7 +84,11 @@ export function Quiz(props: {
 		>
 			<Button
 				variant="outlined"
-				style={{ marginBottom: 20, height: 40 + 'px' }}
+				style={{
+					marginBottom: 20,
+					height: 40 + 'px',
+					backgroundColor:  (edit >= 0) ? 'crimson' : 'unset',
+				}}
 			>Question {q}
 			</Button>
 			{
@@ -130,27 +136,58 @@ export function Quiz(props: {
 				})
 			}
 			<div>
-				<LoadingButton
-					variant="contained"
-					style={{ margin: 20 }}
-					onClick={() => {
-						setScores(new Array<number>(state.numTeams).fill(0));
-						props.addScore(scores, q);
-					}}
-				>
-					Add Score
-				</LoadingButton>
-				<LoadingButton
-					variant="contained"
-					style={{ margin: 20 }}
-					onClick={() => {
-						props.randomize();
-					}}
-				>
-					Random Score (DEBUG)
-				</LoadingButton>
+				{
+					(edit < 0) && <LoadingButton
+						variant="contained"
+						style={{ margin: 20 }}
+						onClick={() => {
+							setScores(new Array<number>(state.numTeams).fill(0));
+							props.addScore(scores, q);
+						}}
+					>
+						Add Score
+					</LoadingButton>
+				}
+				{
+					(edit >= 0) && <LoadingButton
+						variant="contained"
+						style={{ margin: 20 }}
+						onClick={() => {
+							props.editScore(edit, scores);
+							setEdit(-1);
+							setQ(state.currentq);
+							setScores(new Array<number>(state.numTeams).fill(0));
+						}}
+					>
+						Edit Score
+					</LoadingButton>
+				}
+				{
+					false && <LoadingButton
+						variant="contained"
+						style={{ margin: 20 }}
+						onClick={() => {
+							props.randomize();
+						}}
+					>
+						Random Score (DEBUG)
+					</LoadingButton>
+				}
 			</div>
-			<ResponsiveGrid state={state} selectQ={props.selectQ} tableRef={tableRef} innerTableRef={innerTableRef} />
+			<ResponsiveGrid
+				state={state}
+				selectQ={props.selectQ}
+				edit={(index: number) => {
+					if (index < state.log.length) {
+						setEdit(index);
+						setQ(index + 1);
+						setScores(props.state.log[index].points);
+					}
+				}}
+				tableRef={tableRef}
+				editIndex={ edit }
+				innerTableRef={innerTableRef}
+			/>
 			<Line
 				ref={lineRef}
 				data={{
@@ -268,7 +305,14 @@ export function ResponsiveTable(props: { state: State, selectQ: (q: number) => v
 		</TableContainer>
 	);
 }
-export function ResponsiveGrid(props: { state: State, selectQ: (q: number) => void, tableRef: React.RefObject<any>, innerTableRef: React.RefObject<any> }) {
+export function ResponsiveGrid(props: {
+	state: State,
+	selectQ: (q: number) => void,
+	edit: (q: number) => void,
+	editIndex: number,
+	tableRef: React.RefObject<any>,
+	innerTableRef: React.RefObject<any>,
+}) {
 	return (
 		<Box sx={{ flexGrow: 1 }} style={{ margin: 10, padding: 20 }} ref={props.tableRef}>
 			<Typography style={{ marginBottom: 20 }}>
@@ -291,10 +335,13 @@ export function ResponsiveGrid(props: { state: State, selectQ: (q: number) => vo
 					return (
 						<Grid item sm={2} md={2} key={index}>
 							<Item
+								onDoubleClick={ () => props.edit(index) }
 								style={{
-									background: filled ? 'limegreen' : undefined,
+									background: filled ? ((props.editIndex === index) ? 'crimson' : 'limegreen') : undefined,
 									color: filled ? 'black' : 'white',
 									fontSize: 14,
+									cursor: 'default',
+									userSelect: 'none',
 									//cursor: 'pointer'
 								}}
 							//onClick={() => props.selectQ(index + 1)}

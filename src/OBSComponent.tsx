@@ -60,16 +60,25 @@ class OBSComponent extends React.Component<{}, State> {
 		await OBS.showScene('Scores');
 		this.setState({ scene: 'scores' });
 	}
-	updateScore = async (scores: number[], q: number) => {
+	addScore = async (scores: number[], q: number) => {
 		let { log, currentq } = this.state;
 		log.push({ q, points: scores });
 		currentq += 1;
 		this.setState({ log, currentq });
 		await OBS.updateScore(this.state.teams, logToScores(this.state));
 	}
+	editScore = async (index: number, scores: number[]) => {
+		let { log } = this.state;
+
+		log[index].points = scores;
+		this.setState({ log })
+		await OBS.updateScore(this.state.teams, logToScores(this.state));
+
+	}
 	selectQ = async (q: number) => {
 		this.setState({ currentq: q });
 	}
+
 	randomize = () => {
 		const log = [];
 		const fp = this.state.fullpoints;
@@ -82,6 +91,8 @@ class OBSComponent extends React.Component<{}, State> {
 		}
 		this.setState({ log });
 	}
+
+
 	render() {
 		const { state } = this;
 		const { scene, connection } = this.state;
@@ -92,10 +103,11 @@ class OBSComponent extends React.Component<{}, State> {
 				case 'quiz':
 					return <Quiz
 						state={this.state}
-						addScore={this.updateScore}
+						addScore={this.addScore}
 						showScores={this.showScores}
 						selectQ={this.selectQ}
 						randomize={this.randomize}
+						editScore={this.editScore}
 					/>;
 				case 'scores':
 					return <Scores />;
